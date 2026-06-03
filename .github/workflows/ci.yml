@@ -17,24 +17,26 @@ jobs:
           python-version: '3.12'
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Start HTTP server
+        run: python -m http.server 8000 &
+      - name: Wait for server to start
+        run: sleep 3
       - name: Run Selenium tests
         run: pytest tests/ --html=report.html --self-contained-html
       - name: Upload test report
         uses: actions/upload-artifact@v4
         with:
           name: test-report
-         path: report.html
-    
-    deploy:
-      runs-on: ubuntu-latest
-      needs: test
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      steps:
-        - uses: actions/checkout@v4
-        - uses: actions/configure-pages@v4
-        - uses: actions/upload-pages-artifact@v3
-          with:
-            path: '.'
-        - uses: actions/deploy-pages@v4
-            
-    
+          path: report.html
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v4
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - uses: actions/deploy-pages@v4
